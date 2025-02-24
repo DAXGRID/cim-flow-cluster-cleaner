@@ -15,6 +15,16 @@ executors:
         auth:
           username: $DOCKER_LOGIN
           password: $DOCKER_ACCESSTOKEN
+  alpine-git:
+    environment:
+      IMAGE_NAME: daxgrid/cim-flow-cluster-cleaner
+      CHART_PATH: ./dax/cim-flow-cluster-cleaner
+      GIT_USER_NAME: "dax-bot"
+      GIT_USER_EMAIL: "admin@dax.dk"
+      GIT_CLONE_REPO: "git@github.com:DAXGRID/dax-charts.git"
+      SSH_FINGERPRINT: "SHA256:MT4O3aJGBPvN/2TTuByEHu6/v61dR+GShbaM1ZdUFYU"
+    docker:
+    - image: alpine/git
 
 jobs:
   build-app:
@@ -57,6 +67,31 @@ jobs:
            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
            docker push $IMAGE_NAME:latest
            docker push $IMAGE_NAME:$IMAGE_TAG
+  update-helm-chart:
+    executor: alpine-git
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - $SSH_FINGERPRINT
+      - run:
+          name: key-scan
+          command: ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
+          name: git clone charts repo
+          command: git clone $GIT_CLONE_REPO
+      - run:
+          name: package and push
+          command: |
+             apk add bash
+             IMAGE_TAG_NO_V=${CIRCLE_TAG:1}
+             cd ./dax-charts
+             git config user.email $GIT_USER_EMAIL
+             git config user.name $GIT_USER_NAME
+             ./scripts/update-chart-version.sh $CHART_PATH $IMAGE_TAG_NO_V
+             git add .
+             git commit -m "upgrades $IMAGE_NAME to version $CIRCLE_TAG"
+             git push
 
 workflows:
   build-upload_image:
@@ -76,6 +111,15 @@ workflows:
           requires:
            - build-app
            - build-docker-image
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - update-helm-chart:
+          context: docker
+          requires:
+           - docker-publish-image
           filters:
             tags:
               only: /^v.*/
