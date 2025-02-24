@@ -1,0 +1,83 @@
+version: 2.1
+
+executors:
+  dotnet-core-sdk:
+    docker:
+    - image: mcr.microsoft.com/dotnet/sdk:9.0
+      auth:
+        username: $DOCKER_LOGIN
+        password: $DOCKER_ACCESSTOKEN
+  docker-publisher:
+    environment:
+      IMAGE_NAME: daxgrid/cim-flow-cluster-cleaner
+    docker:
+      - image: cimg/base:2025.01
+        auth:
+          username: $DOCKER_LOGIN
+          password: $DOCKER_ACCESSTOKEN
+
+jobs:
+  build-app:
+    executor: dotnet-core-sdk
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: dotnet build -c Release
+  build-docker-image:
+    executor: docker-publisher
+    steps:
+     - checkout
+     - setup_remote_docker
+     - run:
+         name: Build Docker image
+         command: |
+            docker build -t $IMAGE_NAME:latest .
+     - run:
+         name: Archive Docker image
+         command: docker save -o image.tar $IMAGE_NAME
+     - persist_to_workspace:
+         root: .
+         paths:
+          - ./image.tar
+  docker-publish-image:
+    executor: docker-publisher
+    steps:
+     - attach_workspace:
+         at: /tmp/workspace
+     - setup_remote_docker
+     - run:
+         name: Load archived Docker image
+         command: docker load -i /tmp/workspace/image.tar
+     - run:
+         name: Publish Docker Image to Docker Hub
+         command: |
+           echo "$DOCKER_ACCESSTOKEN" | docker login -u $DOCKER_LOGIN --password-stdin
+           IMAGE_TAG=${CIRCLE_TAG}
+           docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
+           docker push $IMAGE_NAME:latest
+           docker push $IMAGE_NAME:$IMAGE_TAG
+
+workflows:
+  build-upload_image:
+    jobs:
+      - build-app:
+          context: docker
+          filters:
+            tags:
+              only: /.*/
+      - build-docker-image:
+          context: docker
+          filters:
+            tags:
+              only: /.*/
+      - docker-publish-image:
+          context: docker
+          requires:
+           - build-app
+           - build-docker-image
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
