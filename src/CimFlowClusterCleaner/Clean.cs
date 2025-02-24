@@ -39,9 +39,10 @@ internal static class Clean
                     .ConfigureAwait(false);
 
                 logger.LogInformation(
-                    "Deleted {PodName} in {PodNamespace}",
+                    "Deleted {PodName} in {PodNamespace} that was {CreatedDate}.",
                     deletedPod.Metadata.Name,
-                    deletedPod.Metadata.NamespaceProperty);
+                    deletedPod.Metadata.NamespaceProperty,
+                    deletedPod.Metadata.CreationTimestamp);
             }
         }
         else
