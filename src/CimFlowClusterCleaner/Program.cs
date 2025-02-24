@@ -4,14 +4,16 @@ namespace CimFlowClusterCleaner;
 
 internal static class Program
 {
-    public static void Main()
+    public static async Task Main()
     {
         var setting = AppSetting.Load<Setting>();
         var logger = LoggerFactory.Create(nameof(Program));
 
         try
         {
-            Clean.Execute(LoggerFactory.Create(nameof(Clean)), setting);
+            await Clean
+                .ExecuteAsync(LoggerFactory.Create(nameof(Clean)), setting)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
