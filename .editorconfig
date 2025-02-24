@@ -1,0 +1,20 @@
+[*.cs]
+
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = none
+
+# CA1848: We disable this since we do not log very much.
+dotnet_diagnostic.CA1848.severity = none
+
+# CA1812: We remove this since we mainly use dependency injection,
+# so a lot of classes might seem that they have not been instantiated.
+dotnet_diagnostic.CA1812.severity = none
+
+# CA1014: We don't care since this is not a public library
+dotnet_diagnostic.CA1014.severity = none
+
+# CS1591 - We do not care about XML comments, since this is not a library.
+dotnet_diagnostic.CS1591.severity = none
+
+# IDE0005: We do not want unused usings.
+dotnet_diagnostic.IDE0005.severity = warning
