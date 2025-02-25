@@ -32,7 +32,7 @@ internal sealed record Setting
     /// The URL to the file server.
     /// </summary>
     [JsonPropertyName("fileServerUrl")]
-    public required string FileServereUrl { get; init; }
+    public required string FileServerUrl { get; init; }
 
     /// <summary>
     /// The username to the file server.

@@ -20,7 +20,7 @@ internal static class Clean
         logger.LogInformation("Deleting files in the archive folder on the file server.");
         await DeleteOldFilesAsync(
             logger,
-            new Uri($"{setting.FileServereUrl}/{setting.ArchivePath}"),
+            new Uri($"{setting.FileServerUrl}/{setting.ArchivePath}"),
             setting.MaxFilesCount,
             setting.FileServerUsername,
             setting.FileServerPassword
@@ -29,7 +29,7 @@ internal static class Clean
         logger.LogInformation("Deleting files in the output folder on the file server.");
         await DeleteOldFilesAsync(
             logger,
-            new Uri($"{setting.FileServereUrl}/{setting.OutputPath}"),
+            new Uri($"{setting.FileServerUrl}/{setting.OutputPath}"),
             setting.MaxFilesCount,
             setting.FileServerUsername,
             setting.FileServerPassword
