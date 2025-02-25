@@ -55,7 +55,7 @@ internal static class Clean
 
         logger.LogInformation("Found {FileCount}, deleting files if exceding {MaxFilesCount} for {Uri}.", files.Count, maxFilesCount, uri);
 
-        foreach (var file in files.OrderBy(x => x.LastWriteTimeUtc).Take(maxFilesCount - files.Count))
+        foreach (var file in files.OrderBy(x => x.LastWriteTimeUtc).Take(files.Count - maxFilesCount))
         {
             logger.LogInformation("Deleting old file {FileName} from {Path}.", file.Name, uri);
             await FileServer.DeleteFileAsync(httpClient, uri).ConfigureAwait(false);
