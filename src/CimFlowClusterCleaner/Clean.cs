@@ -53,7 +53,7 @@ internal static class Clean
             .ToArray()
             .AsReadOnly();
 
-        logger.LogInformation("Found {FileCount}, deleting files if exceding {MaxFilesCount}.", files.Count, maxFilesCount);
+        logger.LogInformation("Found {FileCount}, deleting files if exceding {MaxFilesCount} for {Uri}.", files.Count, maxFilesCount, uri);
 
         foreach (var file in files.OrderBy(x => x.LastWriteTimeUtc).Take(maxFilesCount - files.Count))
         {
