@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Text;
 using k8s;
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +16,47 @@ internal static class Clean
         logger.LogInformation("Starting cleaning process.");
 
         await DeleteOldCimJobsAsync(logger, setting).ConfigureAwait(false);
+
+        logger.LogInformation("Deleting files in the archive folder on the file server.");
+        await DeleteOldFilesAsync(
+            logger,
+            new Uri($"{setting.FileServereUrl}/{setting.ArchivePath}"),
+            setting.MaxFilesCount,
+            setting.FileServerUsername,
+            setting.FileServerPassword
+        ).ConfigureAwait(false);
+
+        logger.LogInformation("Deleting files in the output folder on the file server.");
+        await DeleteOldFilesAsync(
+            logger,
+            new Uri($"{setting.FileServereUrl}/{setting.OutputPath}"),
+            setting.MaxFilesCount,
+            setting.FileServerUsername,
+            setting.FileServerPassword
+        ).ConfigureAwait(false);
+    }
+
+    private static async Task DeleteOldFilesAsync(
+        ILogger logger,
+        Uri uri,
+        int maxFilesCount,
+        string username,
+        string password)
+    {
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Basic",
+            Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes($"{username}:{password}")));
+
+        var files = (await FileServer.GetFilesAsync(httpClient, uri).ConfigureAwait(false))
+            .ToArray()
+            .AsReadOnly();
+
+        foreach (var file in files.OrderBy(x => x.LastWriteTimeUtc).Take(maxFilesCount - files.Count))
+        {
+            logger.LogInformation("Deleting old file {FileName} from {Path}.", file.Name, uri);
+            await FileServer.DeleteFileAsync(httpClient, uri).ConfigureAwait(false);
+        }
     }
 
     private static async Task DeleteOldCimJobsAsync(ILogger logger, Setting setting)

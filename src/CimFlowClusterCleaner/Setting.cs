@@ -27,4 +27,40 @@ internal sealed record Setting
     /// </summary>
     [JsonPropertyName("maxJobCount")]
     public int MaxJobCount { get; init; } = 5;
+
+    /// <summary>
+    /// The URL to the file server.
+    /// </summary>
+    [JsonPropertyName("fileServerUrl")]
+    public required string FileServereUrl { get; init; }
+
+    /// <summary>
+    /// The username to the file server.
+    /// </summary>
+    [JsonPropertyName("fileServerUsername")]
+    public required string FileServerUsername { get; init; }
+
+    /// <summary>
+    /// The password to the file server.
+    /// </summary>
+    [JsonPropertyName("fileServerPassword")]
+    public required string FileServerPassword { get; init; }
+
+    /// <summary>
+    /// The output folder path.
+    /// </summary>
+    [JsonPropertyName("outputPath")]
+    public string OutputPath { get; init; } = "output";
+
+    /// <summary>
+    /// The archive folder path.
+    /// </summary>
+    [JsonPropertyName("archivePath")]
+    public string ArchivePath { get; init; } = "archive";
+
+    /// <summary>
+    /// Max files count before the oldest files are deleted.
+    /// </summary>
+    [JsonPropertyName("maxFilesCount")]
+    public int MaxFilesCount { get; init; } = 7;
 }
