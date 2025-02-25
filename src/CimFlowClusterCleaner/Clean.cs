@@ -15,6 +15,7 @@ internal static class Clean
 
         logger.LogInformation("Starting cleaning process.");
 
+        logger.LogInformation("Starting cleaning old CIM jobs.");
         await DeleteOldCimJobsAsync(logger, setting).ConfigureAwait(false);
 
         logger.LogInformation("Deleting files in the archive folder on the file server.");
