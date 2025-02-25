@@ -57,8 +57,9 @@ internal static class Clean
 
         foreach (var file in files.OrderBy(x => x.LastWriteTimeUtc).Take(files.Count - maxFilesCount))
         {
-            logger.LogInformation("Deleting old file {FileName} from {Path}.", file.Name, uri);
-            await FileServer.DeleteFileAsync(httpClient, uri).ConfigureAwait(false);
+            var deletePath = new Uri($"{uri}/{file.Name}");
+            logger.LogInformation("Deleting old file {FileName} from {Path}.", file.Name, deletePath);
+            await FileServer.DeleteFileAsync(httpClient, deletePath).ConfigureAwait(false);
         }
     }
 
