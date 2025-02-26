@@ -4,7 +4,7 @@ namespace CimFlowClusterCleaner;
 
 internal static class FileServer
 {
-    public static async Task<IEnumerable<FileSystemEntry>> GetFilesAsync(HttpClient client,  Uri uri)
+    public static async Task<IEnumerable<FileSystemEntry>> GetFilesAsync(HttpClient client, Uri uri)
     {
         var requestUri = new Uri(uri, "?json");
         var response = await client.GetAsync(requestUri).ConfigureAwait(false);
@@ -43,7 +43,7 @@ internal sealed class FileServerResponseException : Exception
 
 internal sealed class DeleteFileException : Exception
 {
-    public DeleteFileException() {}
-    public DeleteFileException(string? message) : base(message) {}
-    public DeleteFileException(string? message, Exception? innerException) : base(message, innerException) {}
+    public DeleteFileException() { }
+    public DeleteFileException(string? message) : base(message) { }
+    public DeleteFileException(string? message, Exception? innerException) : base(message, innerException) { }
 }
