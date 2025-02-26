@@ -72,9 +72,10 @@ internal static class Clean
         using var kubernetesClient = new Kubernetes(config);
 
         var labelSelector = $"pod-name-prefix={setting.PodNamePrefix}";
-        var pods = (await kubernetesClient.CoreV1
-                    .ListNamespacedPodAsync(setting.PodNamespace, labelSelector: labelSelector)
-                    .ConfigureAwait(false))
+        var pods = (
+            await kubernetesClient.CoreV1
+            .ListNamespacedPodAsync(setting.PodNamespace, labelSelector: labelSelector)
+            .ConfigureAwait(false))
             .Items
             .ToArray();
 
