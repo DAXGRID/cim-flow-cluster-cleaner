@@ -72,32 +72,32 @@ internal static class Clean
         using var kubernetesClient = new Kubernetes(config);
 
         var labelSelector = $"pod-name-prefix={setting.PodNamePrefix}";
-        var pods = await kubernetesClient.CoreV1
-            .ListNamespacedPodAsync(setting.PodNamespace, labelSelector: labelSelector)
-            .ConfigureAwait(false);
+        var pods = (await kubernetesClient.CoreV1
+                    .ListNamespacedPodAsync(setting.PodNamespace, labelSelector: labelSelector)
+                    .ConfigureAwait(false))
+            .Items
+            .ToArray();
 
-        var completedJobs = pods.Items.OrderBy(x => x.Metadata.CreationTimestamp).ToArray();
-        if (completedJobs.Length > setting.MaxJobCount)
-        {
-            foreach (var completedJob in completedJobs.Take(completedJobs.Length - setting.MaxJobCount))
-            {
-                var deletedPod = await kubernetesClient.CoreV1
-                    .DeleteNamespacedPodAsync(completedJob.Metadata.Name, setting.PodNamespace)
-                    .ConfigureAwait(false);
+        logger.LogInformation(
+            "Found {PodsCount}, deleting pods if exceding {MaxFilesCount} in {PodNamespace} with {Label}.",
+            pods.Length,
+            setting.MaxFilesCount,
+            setting.PodNamespace,
+            labelSelector
+        );
 
-                logger.LogInformation(
-                    "Deleted {PodName} in {PodNamespace} that was {CreatedDate}.",
-                    deletedPod.Metadata.Name,
-                    deletedPod.Metadata.NamespaceProperty,
-                    deletedPod.Metadata.CreationTimestamp);
-            }
-        }
-        else
+        foreach (var completedJob in pods.OrderBy(x => x.Metadata.CreationTimestamp).Take(pods.Length - setting.MaxJobCount))
         {
+            var deletedPod = await kubernetesClient.CoreV1
+                .DeleteNamespacedPodAsync(completedJob.Metadata.Name, setting.PodNamespace)
+                .ConfigureAwait(false);
+
             logger.LogInformation(
-                "No CIM jobs deleted. Current amount of jobs {CompletedJobs} and max count is {MaxCount}",
-                completedJobs.Length,
-                setting.MaxJobCount);
+                "Deleted {PodName} in {PodNamespace} using {LabelSelector}, the pod was created on {CreatedDate}.",
+                deletedPod.Metadata.Name,
+                deletedPod.Metadata.NamespaceProperty,
+                labelSelector,
+                deletedPod.Metadata.CreationTimestamp);
         }
     }
 }
