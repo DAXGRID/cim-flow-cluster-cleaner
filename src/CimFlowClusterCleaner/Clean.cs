@@ -79,9 +79,9 @@ internal static class Clean
             .ToArray();
 
         logger.LogInformation(
-            "Found {PodsCount}, deleting pods if exceding {MaxFilesCount} in {PodNamespace} with {Label}.",
+            "Found {PodsCount}, deleting pods if exceding {MaxJobCount} in {PodNamespace} with {Label}.",
             pods.Length,
-            setting.MaxFilesCount,
+            setting.MaxJobCount,
             setting.PodNamespace,
             labelSelector
         );
