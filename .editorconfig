@@ -18,3 +18,7 @@ dotnet_diagnostic.CS1591.severity = none
 
 # IDE0005: We do not want unused usings.
 dotnet_diagnostic.IDE0005.severity = warning
+
+# CA1873: Evaluation of this argument may be expensive and unnecessary if logging is disabled
+# Disabled since we won't disable logging.
+dotnet_diagnostic.CA1873.severity = none
