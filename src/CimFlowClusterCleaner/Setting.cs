@@ -50,7 +50,7 @@ internal sealed record Setting
     /// The folders on the file server to clean.
     /// </summary>
     [JsonPropertyName("fileServerCleanFolders")]
-    public string FileServerCleanFolders { get; init; } = "output";
+    public required string[] FileServerCleanFolders { get; init; }
 
     /// <summary>
     /// Max files count before the oldest files are deleted.
