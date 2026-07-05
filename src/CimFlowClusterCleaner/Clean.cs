@@ -18,23 +18,17 @@ internal static class Clean
         logger.LogInformation("Starting cleaning old CIM jobs.");
         await DeleteOldCimJobsAsync(logger, setting).ConfigureAwait(false);
 
-        logger.LogInformation("Deleting files in the archive folder on the file server.");
-        await DeleteOldFilesAsync(
-            logger,
-            new Uri($"{setting.FileServerUrl}/{setting.ArchivePath}"),
-            setting.MaxFilesCount,
-            setting.FileServerUsername,
-            setting.FileServerPassword
-        ).ConfigureAwait(false);
-
-        logger.LogInformation("Deleting files in the output folder on the file server.");
-        await DeleteOldFilesAsync(
-            logger,
-            new Uri($"{setting.FileServerUrl}/{setting.OutputPath}"),
-            setting.MaxFilesCount,
-            setting.FileServerUsername,
-            setting.FileServerPassword
-        ).ConfigureAwait(false);
+        foreach (var cleanFolderName in setting.FileServerCleanFolders)
+        {
+            logger.LogInformation("Deleting files in the {FolderName} on the file server.", cleanFolderName);
+            await DeleteOldFilesAsync(
+                logger,
+                new Uri($"{setting.FileServerUrl}/{cleanFolderName}"),
+                setting.MaxFilesCount,
+                setting.FileServerUsername,
+                setting.FileServerPassword
+            ).ConfigureAwait(false);
+        }
     }
 
     private static async Task DeleteOldFilesAsync(

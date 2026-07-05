@@ -47,16 +47,10 @@ internal sealed record Setting
     public required string FileServerPassword { get; init; }
 
     /// <summary>
-    /// The output folder path.
+    /// The folders on the file server to clean.
     /// </summary>
-    [JsonPropertyName("outputPath")]
-    public string OutputPath { get; init; } = "output";
-
-    /// <summary>
-    /// The archive folder path.
-    /// </summary>
-    [JsonPropertyName("archivePath")]
-    public string ArchivePath { get; init; } = "archive";
+    [JsonPropertyName("fileServerCleanFolders")]
+    public string FileServerCleanFolders { get; init; } = "output";
 
     /// <summary>
     /// Max files count before the oldest files are deleted.
