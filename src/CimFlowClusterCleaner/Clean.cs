@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using k8s;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CimFlowClusterCleaner;
 
@@ -18,15 +19,16 @@ internal static class Clean
         logger.LogInformation("Starting cleaning old CIM jobs.");
         await DeleteOldCimJobsAsync(logger, setting).ConfigureAwait(false);
 
-        foreach (var cleanFolderName in setting.FileServerCleanFolders)
+        foreach (var folderToClean in setting.FileServerCleanFolders)
         {
-            logger.LogInformation("Deleting files in the {FolderName} on the file server.", cleanFolderName);
+            logger.LogInformation("Deleting files in the {FolderPath} on the file server.", folderToClean.FolderPath);
             await DeleteOldFilesAsync(
                 logger,
-                new Uri($"{setting.FileServerUrl}/{cleanFolderName}"),
+                new Uri($"{setting.FileServerUrl}/{folderToClean.FolderPath}"),
                 setting.MaxFilesCount,
                 setting.FileServerUsername,
-                setting.FileServerPassword
+                setting.FileServerPassword,
+                folderToClean.FileNameRegex
             ).ConfigureAwait(false);
         }
     }
@@ -36,7 +38,8 @@ internal static class Clean
         Uri uri,
         int maxFilesCount,
         string username,
-        string password)
+        string password,
+        Regex? fileNameRegex)
     {
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
@@ -49,7 +52,7 @@ internal static class Clean
 
         logger.LogInformation("Found {FileCount}, deleting files if exceding {MaxFilesCount} for {Uri}.", files.Count, maxFilesCount, uri);
 
-        foreach (var file in files.OrderBy(x => x.LastWriteTimeUtc).Take(files.Count - maxFilesCount))
+        foreach (var file in files.OrderBy(x => x.LastWriteTimeUtc).Where(x => fileNameRegex is null || fileNameRegex.IsMatch(x.Name)).Take(files.Count - maxFilesCount))
         {
             var deletePath = new Uri($"{uri}/{file.Name}");
             logger.LogInformation("Deleting old file {FileName} from {Path}.", file.Name, deletePath);

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 internal sealed record Setting
 {
@@ -47,14 +48,29 @@ internal sealed record Setting
     public required string FileServerPassword { get; init; }
 
     /// <summary>
-    /// The folders on the file server to clean.
+    /// The configuration of the folders that needs to be cleaned.
     /// </summary>
     [JsonPropertyName("fileServerCleanFolders")]
-    public required string[] FileServerCleanFolders { get; init; }
+    public required FileServerCleanFolder[] FileServerCleanFolders { get; init; }
 
     /// <summary>
     /// Max files count before the oldest files are deleted.
     /// </summary>
     [JsonPropertyName("maxFilesCount")]
     public int MaxFilesCount { get; init; } = 7;
+}
+
+internal sealed record FileServerCleanFolder
+{
+    /// <summary>
+    /// The path to the folder on the file server.
+    /// </summary>
+    [JsonPropertyName("folderPath")]
+    public required string FolderPath { get; init; }
+
+    /// <summary>
+    /// The regex to match the filename, if nothing is provided no regex will be used.
+    /// </summary>
+    [JsonPropertyName("fileNameRegex")]
+    public required Regex? FileNameRegex { get; init; }
 }
