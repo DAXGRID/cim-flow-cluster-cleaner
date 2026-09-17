@@ -11,7 +11,7 @@ executors:
     environment:
       IMAGE_NAME: daxgrid/cim-flow-cluster-cleaner
     docker:
-      - image: cimg/base:2025.01
+      - image: cimg/base:current
         auth:
           username: $DOCKER_LOGIN
           password: $DOCKER_ACCESSTOKEN
